@@ -1,27 +1,57 @@
 import React, {Component} from 'react';
 import { Text } from 'react-native';
 import firebase from 'firebase';
-import { Button , Card , CardSection, Input} from './common';
+import { Button , Card , CardSection, Input, Spinner} from './common';
 
 
 class LoginForm extends Component{
-state = {email: '', password : '', error: ''};
+state = {email: '', password : '', error: '', loading: false};
 
 
     onButtonPress(){
         const { email , password} = this.state;
-        this.setState({ error: ''});
-
+        console.log(email);
+        console.log(password);
+        this.setState({ error: '', loading: true});
+ 
         firebase.auth().signInWithEmailAndPassword(email , password)
+        .then(this.onLoginSuccess.bind(this))
         .catch(() => {
             firebase.auth().createUserWithEmailAndPassword(email, password)
-            .catch(() =>{
-                this.setState({error: 'Authentication failed.'});
-            });
+            .then(this.onLoginSuccess.bind(this))
+            .catch(this.onLoginFail.bind(this));
         });
 
     }
 
+    onLoginFail(){
+        this.setState({
+            loading: false,
+            error: 'Authentication failed.'
+        });
+    }
+    onLoginSuccess(){
+        this.setState({
+            email: '',
+            password: '',
+            loading: false,
+            error: ''
+        });
+    }
+
+
+    renderButton(){
+        if(this.state.loading){
+            return <Spinner size= "small" />;
+        }
+
+        return (
+            <Button onPress= { this.onButtonPress.bind(this)}>
+            Login
+            </Button>
+        );
+
+    }
 
     render(){
         return(
@@ -43,7 +73,7 @@ state = {email: '', password : '', error: ''};
                     placeholder = "password"
                     secureTextEntry
                     value = {this.state.password}
-                    onChangeText = {password => this.setState( { password})} 
+                    onChangeText = {password => this.setState( { password: password})} 
                     />
                 </CardSection>
                 <Text
@@ -52,11 +82,7 @@ state = {email: '', password : '', error: ''};
                 {this.state.error}
                 </Text>
                 <CardSection>
-                    <Button
-                    onPress= { this.onButtonPress.bind(this)}
-                    >
-                        Login
-                    </Button>
+                   {this.renderButton()}
                 </CardSection>
 
 

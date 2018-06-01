@@ -40,7 +40,7 @@ const styles = {
         flex: 1,
         height: 40,
         flexDirection: 'row',
-        alignItem: 'center'
+        alignItems: 'center'
     }
 
 };
